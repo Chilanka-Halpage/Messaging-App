@@ -58,12 +58,28 @@
         </header>
 
         <nav>
-            <div th:insert="components/folder-list :: get-folder-list (name='Folders', folders=${defaultFolders})"></div>
-            <div th:insert="components/folder-list :: get-folder-list (name='User Folders', folders=${userFolders})"></div>
+            <div th:insert="components/folder-list :: get-folder-list (name='Folders', folders=${defaultFolders})">
+            </div>
+            <div th:insert="components/folder-list :: get-folder-list (name='User Folders', folders=${userFolders})">
+            </div>
         </nav>
 
         <main>
-            <!-- Main content -->
+            <div class="card">
+                <div class="card-header">Received Messages</div>
+                <div class="card-body" th:if="receivedMessages">
+                    <div class="list-group">
+                        <a th:each="message : ${receivedMessages}" href="#"
+                            class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1" th:text="${message.subject}"></h5>
+                                <small th:text="${message.agoTime}"></small>
+                            </div>
+                            <p class="mb-1" th:text="${message.to}"></p>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <footer>
