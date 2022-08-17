@@ -66,19 +66,15 @@
 
         <main>
             <div class="card">
-                <div class="card-header" th:text="${folderName} + ' Messages'"></div>
-                <div class="card-body" th:if="receivedMessages">
-                    <div class="list-group">
-                        <a th:href="@{'/messages/' + ${message.key.createdTimeUuid}}" th:each="message : ${receivedMessages}"
-                            class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1" th:text="${message.subject}"></h5>
-                                <small th:text="${message.agoTime}"></small>
-                            </div>
-                            <p class="mb-1" th:text="${message.to}"></p>
-                        </a>
-                    </div>
-                </div>
+                <div class="card-header" th:text="${message.subject}"></div>
+                <dl class="card-body">
+                    <dt>From</dt>
+                    <dd th:text="${message.from}"></dd>
+                    <dt>To</dt>
+                    <dd th:text="${toList}"></dd>
+                    <dt>Body</dt>
+                    <dd th:text="${message.body}"></dd>
+                </dl>
             </div>
         </main>
 

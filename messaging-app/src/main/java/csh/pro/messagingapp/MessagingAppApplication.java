@@ -17,8 +17,10 @@ import csh.pro.messagingapp.config.DataStaxAstraProperties;
 import csh.pro.messagingapp.keys.MessageListKey;
 import csh.pro.messagingapp.models.MessageList;
 import csh.pro.messagingapp.models.Folder;
+import csh.pro.messagingapp.models.Message;
 import csh.pro.messagingapp.repositories.FolderRepository;
 import csh.pro.messagingapp.repositories.MessageListRepository;
+import csh.pro.messagingapp.repositories.MessageRepository;
 
 @SpringBootApplication
 public class MessagingAppApplication {
@@ -28,6 +30,9 @@ public class MessagingAppApplication {
 
 	@Autowired
 	MessageListRepository messageListRepository;
+
+	@Autowired
+	MessageRepository messageRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(MessagingAppApplication.class, args);
@@ -60,10 +65,19 @@ public class MessagingAppApplication {
 			MessageList message = new MessageList();
 			message.setKey(key);
 			message.setSubject("subject " + (i + 1));
-			message.setTo(Arrays.asList("Chilanka-Halpage"));
+			message.setTo(Arrays.asList("Chilanka-Halpage", "test1", "test2"));
 			message.setRead(false);
 
 			messageListRepository.save(message);
+
+			Message messageDetails = new Message();
+			messageDetails.setCreatedTimeUuid(message.getKey().getCreatedTimeUuid());
+			messageDetails.setFrom("Chilanka-Halpage");
+			messageDetails.setTo(message.getTo());
+			messageDetails.setSubject(message.getSubject());
+			messageDetails.setBody("Body " + (i + 1));
+
+			messageRepository.save(messageDetails);
 		}
 	}
 }

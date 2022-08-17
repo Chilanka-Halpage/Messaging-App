@@ -1,9 +1,9 @@
 package csh.pro.messagingapp.controllers;
 
-import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -11,18 +11,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.datastax.oss.driver.api.core.uuid.Uuids;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import csh.pro.messagingapp.models.Folder;
-import csh.pro.messagingapp.models.MessageList;
+import csh.pro.messagingapp.models.Message;
 import csh.pro.messagingapp.repositories.FolderRepository;
-import csh.pro.messagingapp.repositories.MessageListRepository;
+import csh.pro.messagingapp.repositories.MessageRepository;
 import csh.pro.messagingapp.services.FolderService;
 
 @Controller
-public class MessageController {
+public class MessageViewController {
 
     @Autowired
     FolderRepository folderRepository;
@@ -31,12 +29,10 @@ public class MessageController {
     FolderService folderService;
 
     @Autowired
-    MessageListRepository messageListRepository;
+    MessageRepository messageRepository;
     
-    PrettyTime prettyTime = new PrettyTime();
-
-    @GetMapping(value = "/")
-    public String getHomePage(@AuthenticationPrincipal OAuth2User principal, @RequestParam(required = false) String folder, Model model) {
+    @GetMapping(value = "/messages/{id}")
+    public String getHomePage(@AuthenticationPrincipal OAuth2User principal, @PathVariable UUID id, Model model) {
         if (principal == null || !StringUtils.hasText(principal.getAttribute("login")))
             return "index";
 
@@ -49,18 +45,17 @@ public class MessageController {
         List<Folder> defaultFolders = folderService.getDefaultFoldersList(userID);
         model.addAttribute("defaultFolders", defaultFolders);
 
-        // Retrieve Messages
-        if(!StringUtils.hasText(folder))
-            folder = "Received";
-        
-        List<MessageList> receivedMessages = messageListRepository.getMessageListByKeyUserIDAndKeyLabel(userID, folder);
-        receivedMessages.forEach(message -> {
-            Date createdDate = new Date(Uuids.unixTimestamp(message.getKey().getCreatedTimeUuid()));
-            message.setAgoTime(prettyTime.format(createdDate));
-        });
-        model.addAttribute("receivedMessages", receivedMessages);
-        model.addAttribute("folderName", folder);
+        // Retrieve Message Details by ID
+        Optional<Message> optionalMessage = messageRepository.findById(id);
 
-        return "message-page";
+        if(optionalMessage.isEmpty()){
+            return "message-page";
+        }
+        Message message = optionalMessage.get();
+        String toList = String.join(",", message.getTo());
+        model.addAttribute("message", message);
+        model.addAttribute("toList", toList);
+
+        return "message-view";
     }
 }
